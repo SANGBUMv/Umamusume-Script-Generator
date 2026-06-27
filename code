@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>우마무스메 대사 로그 제너레이터</title>
+    <!-- 고화질 스크린샷 캡처용 라이브러리 -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            background-color: #f4f6f9;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { color: #2c3e50; margin-bottom: 20px; }
+        
+        .workspace {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            max-width: 1400px;
+            align-items: flex-start;
+        }
+
+        /* 컨트롤 패널 패키지 */
+        .panel {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .panel h2 { font-size: 16px; margin: 0 0 5px 0; color: #34495e; border-bottom: 2px solid #edf2f7; padding-bottom: 8px;}
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 13px; font-weight: bold; color: #4a5568; }
+        input, textarea, select { padding: 8px 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; }
+        
+        .btn { padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .btn-primary { background: #3182ce; color: white; }
+        .btn-success { background: #38a169; color: white; font-size: 16px; padding: 12px; margin-top: 10px; }
+
+        /* --- 프리뷰 영역 (`1000054139.jpg` 로그창 완벽 재현) --- */
+        .preview-container {
+            background: transparent;
+            padding: 10px;
+        }
+        /* 인쇄 퀄리티 확보를 위해 기본 폭을 900px로 넉넉하게 설정 */
+        #log-capture-target {
+            width: 900px;
+            background: #ffffff;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-sizing: border-box;
+        }
+
+        /* 로그 한 줄의 스타일 */
+        .log-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            width: 100%;
+        }
+
+        /* 1. 좌측 동그란 프로필 이미지 영역 */
+        .profile-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 3px solid #dcdcdc;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background-color: #edf2f7;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0; /* 이미지 크기 고정 */
+        }
+
+        /* 2. 우측 말풍선 영역 (대사 길이에 따라 자동 조절) */
+        .speech-bubble {
+            flex-grow: 1;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px 20px;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            /* 말풍선 꼬리 구현을 위한 미세 여백 */
+            margin-left: 10px; 
+        }
+        /* 말풍선 왼쪽 꼬리 모양 디자인 */
+        .speech-bubble::before {
+            content: '';
+            position: absolute;
+            left: -9px;
+            top: 35px;
+            border-width: 5px 9px 5px 0;
+            border-style: solid;
+            border-color: transparent #e2e8f0 transparent transparent;
+        }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            left: -7px;
+            top: 35px;
+            border-width: 5px 9px 5px 0;
+            border-style: solid;
+            border-color: transparent #ffffff transparent transparent;
+        }
+
+        .char-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #5c3a21; /* 인게임 특유의 브라운 계열 네임 컬러 */
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #e2e8f0;
+            padding-bottom: 6px;
+        }
+
+        .char-speech {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333333;
+            line-height: 1.6;
+            white-space: pre-wrap; /* 엔터 줄바꿈 인정 */
+            word-break: break-all; /* 가로폭 넘치면 자동 줄바꿈 */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>⚡ 우마무스메 대사 로그 제너레이터 ⚔️</h1>
+
+    <div class="workspace">
+        <!-- 왼쪽: 데이터 입력 및 관리창 -->
+        <div class="panel">
+            <h2>1. 캐릭터 프로필 이미지 등록 (최초 1회)</h2>
+            <div class="form-group">
+                <label>캐릭터 이름</label>
+                <input type="text" id="reg-name" placeholder="예: 칼스톤 라이트 오">
+            </div>
+            <div class="form-group">
+                <label>프로필 이미지 첨부</label>
+                <input type="file" id="reg-image" accept="image/*">
+            </div>
+            <button class="btn btn-primary" onclick="registerCharacter()">캐릭터 DB에 저장하기 💾</button>
+
+            <h2>2. 대사 로그 추가</h2>
+            <div class="form-group">
+                <label>말하는 캐릭터 이름</label>
+                <input type="text" id="talk-name" placeholder="이름을 치면 이미지가 자동 매칭됩니다" oninput="matchLiveProfile()">
+            </div>
+            <div class="form-group">
+                <label>대사 내용</label>
+                <textarea id="talk-speech" rows="3" placeholder="대사를 입력하세요. 길어지면 칸이 알아서 늘어납니다."></textarea>
+            </div>
+            <button class="btn btn-primary" style="background:#4a5568;" onclick="addLogWindow()">로그창에 대사 추가 ➔</button>
+            
+            <button class="btn btn-success" onclick="downloadLogPNG()">초고화질 로그 이미지 다운로드 ✨</button>
+            <button class="btn" style="background:#e53e3e; color:white; font-size:12px; padding:5px;" onclick="clearAllLogs()">로그 전체 초기화</button>
+        </div>
+
+        <!-- 오른쪽: 실시간 연출 프리뷰 창 -->
+        <div class="preview-container">
+            <div id="log-capture-target">
+                <!-- 기본 샘플 데이터 가이드 레이아웃 -->
+                <div class="log-row">
+                    <div class="profile-circle" style="background-image: url('https://placehold.co/150?text=Uma');"></div>
+                    <div class="speech-bubble">
+                        <div class="char-name">가이드 트레이너</div>
+                        <div class="char-speech">왼쪽 창에서 캐릭터 이름을 등록한 뒤 대사를 추가해 보세요! 이미지 테두리와 말풍선 창이 자동으로 연출됩니다.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 캐릭터 이름-이미지(Base64) 쌍을 저장할 로컬 데이터베이스 오브젝트
+        let characterDB = JSON.parse(localStorage.getItem('uma_character_db')) || {};
+
+        // 1. 캐릭터 등록 기능
+        function registerCharacter() {
+            const name = document.getElementById('reg-name').value.trim();
+            const fileInput = document.getElementById('reg-image');
+
+            if(!name || !fileInput.files[0]) {
+                alert("캐릭터 이름과 이미지 파일을 모두 입력해주세요!");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                characterDB[name] = e.target.result; // 이미지를 텍스트 데이터로 변환해 저장
+                localStorage.setItem('uma_character_db', JSON.stringify(characterDB));
+                alert(`[${name}] 캐릭터 프로필이 등록되었습니다! 이제 대사창에 이름을 쓰면 자동 적용됩니다.`);
+                document.getElementById('reg-name').value = '';
+                fileInput.value = '';
+            }
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+
+        // 이름 입력 시 실시간으로 DB에 있는 이미지 매칭 유무 확인 (부가 기능)
+        function matchLiveProfile() {
+            const name = document.getElementById('talk-name').value.trim();
+            // 등록된 캐릭이면 미세한 시각 효과 등을 줄 수 있음 (확장용)
+        }
+
+        // 2. 대사 로그 추가 기능 (대사 길이에 맞춰 유연하게 늘어나는 구조)
+        let isFirstLog = true;
+        function addLogWindow() {
+            const name = document.getElementById('talk-name').value.trim();
+            const speech = document.getElementById('talk-speech').value;
+
+            if(!name || !speech) {
+                alert("이름과 대사를 입력해 주세요!");
+                return;
+            }
+
+            const targetArea = document.getElementById('log-capture-target');
+            
+            // 처음 추가할 때는 가이드 샘플을 삭제
+            if(isFirstLog) {
+                targetArea.innerHTML = '';
+                isFirstLog = false;
+            }
+
+            // DB에서 이미지 추출, 없으면 기본 빈 이미지 적용
+            const profileImg = characterDB[name] || 'https://placehold.co/150?text=No+Img';
+
+            // 새 로그 노드 생성
+            const logRow = document.createElement('div');
+            logRow.className = 'log-row';
+            logRow.innerHTML = `
+                <div class="profile-circle" style="background-image: url('${profileImg}');"></div>
+                <div class="speech-bubble">
+                    <div class="char-name">${name}</div>
+                    <div class="char-speech">${speech}</div>
+                </div>
+            `;
+
+            targetArea.appendChild(logRow);
+            document.getElementById('talk-speech').value = ''; // 대사 입력칸 비우기
+        }
+
+        function clearAllLogs() {
+            if(confirm("작성 중인 로그를 모두 초기화하시겠습니까?")) {
+                document.getElementById('log-capture-target').innerHTML = '';
+                isFirstLog = true;
+            }
+        }
+
+        // 3. 책 내지용 초고화질 배율 다운로드 엔진
+        function downloadLogPNG() {
+            const target = document.getElementById('log-capture-target');
+            
+            html2canvas(target, {
+                scale: 2.5,           // 2.5배 해상도 업스케일링을 통해 인쇄물 품질 확보 (글자 깨짐 방지)
+                backgroundColor: null, // 투명 배경 처리하여 북아트 편집 레이아웃 최적화
+                logging: false,
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `uma_dialogue_log_${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>

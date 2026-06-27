@@ -136,29 +136,29 @@
     <div class="workspace">
         <!-- 왼쪽: 데이터 입력 및 관리창 -->
         <div class="panel">
-            <h2>1. 캐릭터 이미지 등록 (최초 1회)</h2>
+            <h2>1. 캐릭터 이미지 업로드 (최초 1회)</h2>
             <div class="form-group">
                 <label>캐릭터 이름</label>
                 <input type="text" id="reg-name" placeholder="예: 칼스톤 라이트 오">
             </div>
             <div class="form-group">
-                <label>프로필 이미지 첨부</label>
+                <label>이미지 첨부</label>
                 <input type="file" id="reg-image" accept="image/*">
             </div>
-            <button class="btn btn-primary" onclick="registerCharacter()">캐릭터 DB에 저장하기 💾</button>
+            <button class="btn btn-primary" onclick="registerCharacter()">DB에 저장하기</button>
 
-            <h2>2. 대사 로그 추가</h2>
+            <h2>2. 대사 추가</h2>
             <div class="form-group">
                 <label>말하는 캐릭터 이름</label>
-                <input type="text" id="talk-name" placeholder="이름을 치면 이미지가 자동 매칭됩니다" oninput="matchLiveProfile()">
+                <input type="text" id="talk-name" placeholder="이름을 치면 이미지가 자동으로 매칭됩니다" oninput="matchLiveProfile()">
             </div>
             <div class="form-group">
                 <label>대사 내용</label>
-                <textarea id="talk-speech" rows="3" placeholder="대사를 입력하세요. 길어지면 칸이 알아서 늘어납니다."></textarea>
+                <textarea id="talk-speech" rows="3" placeholder="대사를 입력하세요. 길어지면 칸이 알아서 늘어납니다. 줄바꿈 OK"></textarea>
             </div>
             <button class="btn btn-primary" style="background:#4a5568;" onclick="addLogWindow()">로그창에 대사 추가 ➔</button>
             
-            <button class="btn btn-success" onclick="downloadLogPNG()">초고화질 로그 이미지 다운로드 ✨</button>
+            <button class="btn btn-success" onclick="downloadLogPNG()">로그 이미지 다운로드</button>
             <button class="btn" style="background:#e53e3e; color:white; font-size:12px; padding:5px;" onclick="clearAllLogs()">로그 전체 초기화</button>
         </div>
 
@@ -169,8 +169,8 @@
                 <div class="log-row">
                     <div class="profile-circle" style="background-image: url('https://placehold.co/150?text=Uma');"></div>
                     <div class="speech-bubble">
-                        <div class="char-name">가이드 트레이너</div>
-                        <div class="char-speech">왼쪽 창에서 캐릭터 이름을 등록한 뒤 대사를 추가해 보세요! 이미지 테두리와 말풍선 창이 자동으로 연출됩니다.</div>
+                        <div class="char-name"> 뒤랑달 </div>
+                        <div class="char-speech"> 주군, 왼쪽 창에서 말하는 우마무스메의 이름을 입력한 뒤 대사를 추가하시면 됩니다. </div>
                     </div>
                 </div>
             </div>
@@ -178,16 +178,14 @@
     </div>
 
     <script>
-        // 캐릭터 이름-이미지(Base64) 쌍을 저장할 로컬 데이터베이스 오브젝트
         let characterDB = JSON.parse(localStorage.getItem('uma_character_db')) || {};
 
-        // 1. 캐릭터 등록 기능
         function registerCharacter() {
             const name = document.getElementById('reg-name').value.trim();
             const fileInput = document.getElementById('reg-image');
 
             if(!name || !fileInput.files[0]) {
-                alert("캐릭터 이름과 이미지 파일을 모두 입력해주세요!");
+                alert("캐릭터 이름과 이미지 파일을 모두 등록해주세요.");
                 return;
             }
 
@@ -195,42 +193,38 @@
             reader.onload = function(e) {
                 characterDB[name] = e.target.result; // 이미지를 텍스트 데이터로 변환해 저장
                 localStorage.setItem('uma_character_db', JSON.stringify(characterDB));
-                alert(`[${name}] 캐릭터 프로필이 등록되었습니다! 이제 대사창에 이름을 쓰면 자동 적용됩니다.`);
+                alert(`[${name}] 프로필이 등록되었습니다. 대사창에 이름을 쓰면 자동으로 적용됩니다.`);
                 document.getElementById('reg-name').value = '';
                 fileInput.value = '';
             }
             reader.readAsDataURL(fileInput.files[0]);
         }
 
-        // 이름 입력 시 실시간으로 DB에 있는 이미지 매칭 유무 확인 (부가 기능)
         function matchLiveProfile() {
             const name = document.getElementById('talk-name').value.trim();
-            // 등록된 캐릭이면 미세한 시각 효과 등을 줄 수 있음 (확장용)
+
         }
 
-        // 2. 대사 로그 추가 기능 (대사 길이에 맞춰 유연하게 늘어나는 구조)
+
         let isFirstLog = true;
         function addLogWindow() {
             const name = document.getElementById('talk-name').value.trim();
             const speech = document.getElementById('talk-speech').value;
 
             if(!name || !speech) {
-                alert("이름과 대사를 입력해 주세요!");
+                alert("이름과 대사를 입력해 주세요.");
                 return;
             }
 
             const targetArea = document.getElementById('log-capture-target');
             
-            // 처음 추가할 때는 가이드 샘플을 삭제
             if(isFirstLog) {
                 targetArea.innerHTML = '';
                 isFirstLog = false;
             }
 
-            // DB에서 이미지 추출, 없으면 기본 빈 이미지 적용
             const profileImg = characterDB[name] || 'https://placehold.co/150?text=No+Img';
 
-            // 새 로그 노드 생성
             const logRow = document.createElement('div');
             logRow.className = 'log-row';
             logRow.innerHTML = `
@@ -242,7 +236,7 @@
             `;
 
             targetArea.appendChild(logRow);
-            document.getElementById('talk-speech').value = ''; // 대사 입력칸 비우기
+            document.getElementById('talk-speech').value = ''; 
         }
 
         function clearAllLogs() {
@@ -252,13 +246,12 @@
             }
         }
 
-        // 3. 책 내지용 초고화질 배율 다운로드 엔진
         function downloadLogPNG() {
             const target = document.getElementById('log-capture-target');
             
             html2canvas(target, {
-                scale: 2.5,           // 2.5배 해상도 업스케일링을 통해 인쇄물 품질 확보 (글자 깨짐 방지)
-                backgroundColor: null, // 투명 배경 처리하여 북아트 편집 레이아웃 최적화
+                scale: 2.5,           
+                backgroundColor: null, 
                 logging: false,
                 useCORS: true
             }).then(canvas => {

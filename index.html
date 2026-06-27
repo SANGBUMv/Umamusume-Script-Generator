@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>우마무스메 스크립트 생성기</title>
-    <!-- 고화질 스크린샷 캡처용 라이브러리 -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         body {
@@ -76,12 +75,11 @@
             background-size: cover;
             background-position: center;
             flex-shrink: 0; 
-            transition: border-radius 0.2s; /* 형태 변경 시 부드럽게 전환 */
+            transition: border-radius 0.2s;
         }
 
-        /* 스타일 결정을 위한 디자인 클래스 분리 */
-        .shape-circle { border-radius: 50%; } /* 원형 모양 */
-        .shape-square { border-radius: 12px; } /* 사각형 모양 (귀 보존용 모서리 곡선) */
+        .shape-circle { border-radius: 50%; } 
+        .shape-square { border-radius: 12px; } 
 
         .speech-bubble {
             flex-grow: 1;
@@ -137,9 +135,8 @@
     <h1> 우마무스메 스크립트 생성기 </h1>
 
     <div class="workspace">
-        <!-- 왼쪽: 데이터 입력 및 관리창 -->
         <div class="panel">
-            <h2>1. 이미지 업로드 (최초 1회)</h2>
+            <h2>1. 캐릭터 이미지 업로드</h2>
             <div class="form-group">
                 <label>캐릭터 이름</label>
                 <input type="text" id="reg-name" placeholder="예: 칼스톤 라이트 오">
@@ -147,27 +144,26 @@
             <div class="form-group">
                 <label>이미지 첨부</label>
                 <input type="file" id="reg-image" accept="image/*">
-                <!-- 1번 요구사항: 수정 안내 문구 추가 -->
-                <p class="info-text">이미지를 수정하고 싶으신 경우, 기존 이름과 동일하게 적고 수정할 이미지를 업로드하면 자동으로 갱신됩니다.</p>
+                <p class="info-text">이미지를 수정하고 싶으신 경우, 기존 이름과 동일하게 적고 수정할 이미지를 업로드하시면 자동으로 갱신됩니다.</p>
+                <p class="info-text" style="color: #3182ce;">('선택지'에는 기본 이미지가 내장되어 있어 별도로 등록하지 않으셔도 됩니다.)</p>
             </div>
             <button class="btn btn-primary" onclick="registerCharacter()">DB에 저장하기</button>
 
             <h2>2. 대사 추가</h2>
             <div class="form-group">
                 <label>말하는 캐릭터 이름</label>
-                <input type="text" id="talk-name" placeholder="이름을 입력하면 이미지가 자동으로 매칭됩니다">
+                <input type="text" id="talk-name" placeholder="예: 뒤랑달, 선택지 등">
             </div>
-            <!-- 2번 요구사항: 이미지 모양 선택 UI 추가 -->
             <div class="form-group">
-                <label>이미지 모양 선택</label>
+                <label>프로필 이미지 모양 선택</label>
                 <select id="profile-shape-select">
-                    <option value="shape-circle">원</option>
-                    <option value="shape-square" selected>사각형</option>
+                    <option value="shape-circle">원 모양</option>
+                    <option value="shape-square" selected>사각형 모양</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>대사 내용</label>
-                <textarea id="talk-speech" rows="3" placeholder="대사를 입력하세요. 길어지면 칸이 알아서 늘어납니다. 줄바꿈 OK"></textarea>
+                <textarea id="talk-speech" rows="3" placeholder="대사를 입력하세요."></textarea>
             </div>
             <button class="btn btn-primary" style="background:#4a5568;" onclick="addLogWindow()">로그창에 대사 추가 ➔</button>
             
@@ -175,15 +171,13 @@
             <button class="btn" style="background:#e53e3e; color:white; font-size:12px; padding:5px;" onclick="clearAllLogs()">로그 전체 초기화</button>
         </div>
 
-        <!-- 오른쪽: 실시간 연출 프리뷰 창 -->
         <div class="preview-container">
             <div id="log-capture-target">
-                <!-- 기본 샘플 데이터 가이드 레이아웃 -->
                 <div class="log-row">
-                    <div class="profile-frame shape-square" id="sample-profile" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'150\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23edf2f7\'/><text x=\'50%\' y=\'55%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'16\' fill=\'%23718096\' font-weight=\'bold\'>Uma</text></svg>');"></div>
+                    <div class="profile-frame shape-square" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'150\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23edf2f7\'/><text x=\'50%\' y=\'55%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'16\' fill=\'%23718096\' font-weight=\'bold\'>Uma</text></svg>');"></div>
                     <div class="speech-bubble">
-                        <div class="char-name"> 뒤랑달 </div>
-                        <div class="char-speech">주군, 프로필 이미지 모양 선택 드롭다운을 통해 원형과 사각형을 언제든 바꿀 수 있습니다! 귀 부분을 지켜주십시오!</div>
+                        <div class="char-name">뒤랑달</div>
+                        <div class="char-speech">주군, 왼쪽 창에서 우마무스메의 이름을 입력한 뒤 대사를 추가하시면 됩니다.</div>
                     </div>
                 </div>
             </div>
@@ -192,6 +186,9 @@
 
     <script>
         let characterDB = JSON.parse(localStorage.getItem('uma_character_db')) || {};
+
+        // 🌟 [방법 A] GitHub에 choice.png로 같이 올릴 경우 아래 주소를 그대로 쓰시면 됩니다.
+        const CHOICE_IMAGE_URL = "./choice.png"; 
 
         function registerCharacter() {
             const name = document.getElementById('reg-name').value.trim();
@@ -206,7 +203,7 @@
             reader.onload = function(e) {
                 characterDB[name] = e.target.result; 
                 localStorage.setItem('uma_character_db', JSON.stringify(characterDB));
-                alert(`[${name}] 프로필이 저장되었습니다. 대사창에 이름을 쓰면 자동으로 적용됩니다.`);
+                alert(`[${name}] 프로필이 저장(갱신)되었습니다.`);
                 document.getElementById('reg-name').value = '';
                 fileInput.value = '';
             }
@@ -217,7 +214,6 @@
         function addLogWindow() {
             const name = document.getElementById('talk-name').value.trim();
             const speech = document.getElementById('talk-speech').value;
-            // 유저가 선택한 모양 클래스 가져오기 (shape-circle 또는 shape-square)
             const chosenShape = document.getElementById('profile-shape-select').value;
 
             if(!name || !speech) {
@@ -232,11 +228,19 @@
                 isFirstLog = false;
             }
 
-            const profileImg = characterDB[name] || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23edf2f7'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='14' fill='%23a0aec0'>No Img</text></svg>";
+            // --- 핵심: 선택지 이미지 자동 판별 로직 ---
+            let profileImg = "";
+            
+            if (name.includes("선택지")) {
+                // 이름에 '선택지'가 들어가면 미리 정의한 기본 이미지를 강제 지정
+                profileImg = CHOICE_IMAGE_URL;
+            } else {
+                // 일반 캐릭터라면 DB에서 찾고, 없으면 기본 No Img 표시
+                profileImg = characterDB[name] || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23edf2f7'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='14' fill='%23a0aec0'>No Img</text></svg>";
+            }
 
             const logRow = document.createElement('div');
             logRow.className = 'log-row';
-            // 고른 모양(chosenShape) 클래스를 이미지 프레임 태그에 부여합니다.
             logRow.innerHTML = `
                 <div class="profile-frame ${chosenShape}" style="background-image: url('${profileImg}');"></div>
                 <div class="speech-bubble">

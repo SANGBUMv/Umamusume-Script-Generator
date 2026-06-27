@@ -37,6 +37,7 @@
         .panel h2 { font-size: 16px; margin: 0 0 5px 0; color: #34495e; border-bottom: 2px solid #edf2f7; padding-bottom: 8px;}
         .form-group { display: flex; flex-direction: column; gap: 6px; }
         .form-group label { font-size: 13px; font-weight: bold; color: #4a5568; }
+        .form-group .info-text { font-size: 11px; color: #718096; line-height: 1.4; }
         input, textarea, select { padding: 8px 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; }
         
         .btn { padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
@@ -58,7 +59,6 @@
             box-sizing: border-box;
         }
 
-
         .log-row {
             display: flex;
             align-items: flex-start;
@@ -66,18 +66,22 @@
             width: 100%;
         }
 
-
-        .profile-circle {
+        /* 프로필 이미지 기본 프레임 */
+        .profile-frame {
             width: 90px;
             height: 90px;
-            border-radius: 50%;
             border: 3px solid #dcdcdc;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             background-color: #edf2f7;
             background-size: cover;
             background-position: center;
             flex-shrink: 0; 
+            transition: border-radius 0.2s; /* 형태 변경 시 부드럽게 전환 */
         }
+
+        /* 스타일 결정을 위한 디자인 클래스 분리 */
+        .shape-circle { border-radius: 50%; } /* 원형 모양 */
+        .shape-square { border-radius: 12px; } /* 사각형 모양 (귀 보존용 모서리 곡선) */
 
         .speech-bubble {
             flex-grow: 1;
@@ -87,7 +91,6 @@
             padding: 15px 20px;
             position: relative;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-
             margin-left: 10px; 
         }
 
@@ -144,13 +147,23 @@
             <div class="form-group">
                 <label>이미지 첨부</label>
                 <input type="file" id="reg-image" accept="image/*">
+                <!-- 1번 요구사항: 수정 안내 문구 추가 -->
+                <p class="info-text">💡 이미지를 수정하고 싶으신 경우, 기존 이름과 동일하게 적고 수정할 이미지를 업로드하시면 자동으로 갱신됩니다.</p>
             </div>
             <button class="btn btn-primary" onclick="registerCharacter()">DB에 저장하기</button>
 
             <h2>2. 대사 추가</h2>
             <div class="form-group">
                 <label>말하는 캐릭터 이름</label>
-                <input type="text" id="talk-name" placeholder="이름을 치면 이미지가 자동으로 매칭됩니다" oninput="matchLiveProfile()">
+                <input type="text" id="talk-name" placeholder="이름을 치면 이미지가 자동으로 매칭됩니다">
+            </div>
+            <!-- 2번 요구사항: 이미지 모양 선택 UI 추가 -->
+            <div class="form-group">
+                <label>프로필 이미지 모양 선택</label>
+                <select id="profile-shape-select">
+                    <option value="shape-circle">원 모양 (인게임 로그창 감성)</option>
+                    <option value="shape-square" selected>사각형 모양 (우마무스메 귀 보존용 ✨)</option>
+                </select>
             </div>
             <div class="form-group">
                 <label>대사 내용</label>
@@ -167,10 +180,10 @@
             <div id="log-capture-target">
                 <!-- 기본 샘플 데이터 가이드 레이아웃 -->
                 <div class="log-row">
-                    <div class="profile-circle" style="background-image: url('https://placehold.co/150?text=Uma');"></div>
+                    <div class="profile-frame shape-square" id="sample-profile" style="background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'150\' height=\'150\' viewBox=\'0 0 100 100\'><rect width=\'100\' height=\'100\' fill=\'%23edf2f7\'/><text x=\'50%\' y=\'55%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'16\' fill=\'%23718096\' font-weight=\'bold\'>Uma</text></svg>');"></div>
                     <div class="speech-bubble">
                         <div class="char-name"> 뒤랑달 </div>
-                        <div class="char-speech">주군, 왼쪽 창에서 우마무스메의 이름을 입력한 뒤 대사를 추가하시면 됩니다. </div>
+                        <div class="char-speech">주군, 프로필 이미지 모양 선택 드롭다운을 통해 원형과 사각형을 언제든 바꿀 수 있습니다! 귀 부분을 지켜주십시오!</div>
                     </div>
                 </div>
             </div>
@@ -191,25 +204,21 @@
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                characterDB[name] = e.target.result; // 이미지를 텍스트 데이터로 변환해 저장
+                characterDB[name] = e.target.result; 
                 localStorage.setItem('uma_character_db', JSON.stringify(characterDB));
-                alert(`[${name}] 프로필이 등록되었습니다. 대사창에 이름을 쓰면 자동으로 적용됩니다.`);
+                alert(`[${name}] 프로필이 저장(갱신)되었습니다. 대사창에 이름을 쓰면 자동으로 적용됩니다.`);
                 document.getElementById('reg-name').value = '';
                 fileInput.value = '';
             }
             reader.readAsDataURL(fileInput.files[0]);
         }
 
-        function matchLiveProfile() {
-            const name = document.getElementById('talk-name').value.trim();
-
-        }
-
-
         let isFirstLog = true;
         function addLogWindow() {
             const name = document.getElementById('talk-name').value.trim();
             const speech = document.getElementById('talk-speech').value;
+            // 유저가 선택한 모양 클래스 가져오기 (shape-circle 또는 shape-square)
+            const chosenShape = document.getElementById('profile-shape-select').value;
 
             if(!name || !speech) {
                 alert("이름과 대사를 입력해 주세요.");
@@ -223,12 +232,13 @@
                 isFirstLog = false;
             }
 
-            const profileImg = characterDB[name] || 'https://placehold.co/150?text=No+Img';
+            const profileImg = characterDB[name] || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23edf2f7'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='14' fill='%23a0aec0'>No Img</text></svg>";
 
             const logRow = document.createElement('div');
             logRow.className = 'log-row';
+            // 고른 모양(chosenShape) 클래스를 이미지 프레임 태그에 부여합니다.
             logRow.innerHTML = `
-                <div class="profile-circle" style="background-image: url('${profileImg}');"></div>
+                <div class="profile-frame ${chosenShape}" style="background-image: url('${profileImg}');"></div>
                 <div class="speech-bubble">
                     <div class="char-name">${name}</div>
                     <div class="char-speech">${speech}</div>
@@ -253,7 +263,8 @@
                 scale: 2.5,           
                 backgroundColor: null, 
                 logging: false,
-                useCORS: true
+                useCORS: true,
+                allowTaint: true 
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `uma_dialogue_log_${Date.now()}.png`;

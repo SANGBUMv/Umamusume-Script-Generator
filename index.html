@@ -139,7 +139,7 @@
     <div class="workspace">
         <!-- 왼쪽: 데이터 입력 및 관리창 -->
         <div class="panel">
-            <h2>1. 캐릭터 이미지 업로드 (최초 1회)</h2>
+            <h2>1. 이미지 업로드 (최초 1회)</h2>
             <div class="form-group">
                 <label>캐릭터 이름</label>
                 <input type="text" id="reg-name" placeholder="예: 칼스톤 라이트 오">
@@ -148,21 +148,21 @@
                 <label>이미지 첨부</label>
                 <input type="file" id="reg-image" accept="image/*">
                 <!-- 1번 요구사항: 수정 안내 문구 추가 -->
-                <p class="info-text">💡 이미지를 수정하고 싶으신 경우, 기존 이름과 동일하게 적고 수정할 이미지를 업로드하시면 자동으로 갱신됩니다.</p>
+                <p class="info-text">이미지를 수정하고 싶으신 경우, 기존 이름과 동일하게 적고 수정할 이미지를 업로드하면 자동으로 갱신됩니다.</p>
             </div>
             <button class="btn btn-primary" onclick="registerCharacter()">DB에 저장하기</button>
 
             <h2>2. 대사 추가</h2>
             <div class="form-group">
                 <label>말하는 캐릭터 이름</label>
-                <input type="text" id="talk-name" placeholder="이름을 치면 이미지가 자동으로 매칭됩니다">
+                <input type="text" id="talk-name" placeholder="이름을 입력하면 이미지가 자동으로 매칭됩니다">
             </div>
             <!-- 2번 요구사항: 이미지 모양 선택 UI 추가 -->
             <div class="form-group">
-                <label>프로필 이미지 모양 선택</label>
+                <label>이미지 모양 선택</label>
                 <select id="profile-shape-select">
-                    <option value="shape-circle">원 모양 (인게임 로그창 감성)</option>
-                    <option value="shape-square" selected>사각형 모양 (우마무스메 귀 보존용 ✨)</option>
+                    <option value="shape-circle">원</option>
+                    <option value="shape-square" selected>사각형</option>
                 </select>
             </div>
             <div class="form-group">
@@ -206,7 +206,7 @@
             reader.onload = function(e) {
                 characterDB[name] = e.target.result; 
                 localStorage.setItem('uma_character_db', JSON.stringify(characterDB));
-                alert(`[${name}] 프로필이 저장(갱신)되었습니다. 대사창에 이름을 쓰면 자동으로 적용됩니다.`);
+                alert(`[${name}] 프로필이 저장되었습니다. 대사창에 이름을 쓰면 자동으로 적용됩니다.`);
                 document.getElementById('reg-name').value = '';
                 fileInput.value = '';
             }

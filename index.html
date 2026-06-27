@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>우마무스메 대사 로그 제너레이터</title>
+    <title>우마무스메 스크립트 생성기</title>
     <!-- 고화질 스크린샷 캡처용 라이브러리 -->
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
@@ -24,7 +24,6 @@
             align-items: flex-start;
         }
 
-        /* 컨트롤 패널 패키지 */
         .panel {
             background: white;
             padding: 20px;
@@ -44,12 +43,11 @@
         .btn-primary { background: #3182ce; color: white; }
         .btn-success { background: #38a169; color: white; font-size: 16px; padding: 12px; margin-top: 10px; }
 
-        /* --- 프리뷰 영역 (`1000054139.jpg` 로그창 완벽 재현) --- */
         .preview-container {
             background: transparent;
             padding: 10px;
         }
-        /* 인쇄 퀄리티 확보를 위해 기본 폭을 900px로 넉넉하게 설정 */
+
         #log-capture-target {
             width: 900px;
             background: #ffffff;
@@ -60,7 +58,7 @@
             box-sizing: border-box;
         }
 
-        /* 로그 한 줄의 스타일 */
+
         .log-row {
             display: flex;
             align-items: flex-start;
@@ -68,7 +66,7 @@
             width: 100%;
         }
 
-        /* 1. 좌측 동그란 프로필 이미지 영역 */
+
         .profile-circle {
             width: 90px;
             height: 90px;
@@ -78,10 +76,9 @@
             background-color: #edf2f7;
             background-size: cover;
             background-position: center;
-            flex-shrink: 0; /* 이미지 크기 고정 */
+            flex-shrink: 0; 
         }
 
-        /* 2. 우측 말풍선 영역 (대사 길이에 따라 자동 조절) */
         .speech-bubble {
             flex-grow: 1;
             background: #ffffff;
@@ -90,10 +87,10 @@
             padding: 15px 20px;
             position: relative;
             box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            /* 말풍선 꼬리 구현을 위한 미세 여백 */
+
             margin-left: 10px; 
         }
-        /* 말풍선 왼쪽 꼬리 모양 디자인 */
+
         .speech-bubble::before {
             content: '';
             position: absolute;
@@ -116,7 +113,7 @@
         .char-name {
             font-size: 18px;
             font-weight: bold;
-            color: #5c3a21; /* 인게임 특유의 브라운 계열 네임 컬러 */
+            color: #5c3a21;
             margin-bottom: 12px;
             border-bottom: 1px dashed #e2e8f0;
             padding-bottom: 6px;
@@ -127,19 +124,19 @@
             font-weight: 600;
             color: #333333;
             line-height: 1.6;
-            white-space: pre-wrap; /* 엔터 줄바꿈 인정 */
-            word-break: break-all; /* 가로폭 넘치면 자동 줄바꿈 */
+            white-space: pre-wrap;
+            word-break: break-all;
         }
     </style>
 </head>
 <body>
 
-    <h1>⚡ 우마무스메 대사 로그 제너레이터 ⚔️</h1>
+    <h1> 우마무스메 스크립트 생성기 </h1>
 
     <div class="workspace">
         <!-- 왼쪽: 데이터 입력 및 관리창 -->
         <div class="panel">
-            <h2>1. 캐릭터 프로필 이미지 등록 (최초 1회)</h2>
+            <h2>1. 캐릭터 이미지 등록 (최초 1회)</h2>
             <div class="form-group">
                 <label>캐릭터 이름</label>
                 <input type="text" id="reg-name" placeholder="예: 칼스톤 라이트 오">
